@@ -1,7 +1,6 @@
 name: egl-kyu
 base: core26
-#adopt-info: egl-kyu
-version: testing
+adopt-info: epic-games-launcher
 platforms:
   amd64:
     build-on: [amd64]
@@ -44,18 +43,27 @@ plugs:
     private: true
 
 parts:
-  egl-kyu:
-    plugin: dump
-    source: https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncher-x86_64.deb
+  epic-games-launcher:
+    plugin: nil
+    build-packages: [curl, dpkg]
     override-build: |
-      craftctl default
+      set -eux
+      curl -L -o "$CRAFT_PART_BUILD/epic.deb" "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncher-x86_64.deb"
+      dpkg-deb -R "$CRAFT_PART_BUILD/epic.deb" "$CRAFT_PART_INSTALL"
+      VERSION=$(awk '/^Version:/ {print $2; exit}' "$CRAFT_PART_INSTALL/DEBIAN/control")
+      if [ -z "$VERSION" ]; then
+        echo "ERROR: empty version from control" >&2
+        exit 1
+      fi
+      craftctl set version="$VERSION"
       sed -i 's|Name=Epic Games Launcher|Name=Epic Games Launcher [Kyu]|' $CRAFT_PART_INSTALL/usr/share/applications/epic-games-launcher.desktop
       sed -i 's|Icon=EpicGamesLauncher|Icon=${SNAP}/usr/share/icons/hicolor/256x256@2/apps/EpicGamesLauncher.png|' $CRAFT_PART_INSTALL/usr/share/applications/epic-games-launcher.desktop
     prime:
       - usr
 
+
   dependencies:
-    after: [egl-kyu]
+    after: [epic-games-launcher]
     plugin: nil
     stage-packages:
       - libsdl2-2.0-0
@@ -70,6 +78,6 @@ parts:
       - usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libXss.so*
 
   other-files:
-    after: [egl-kyu]
+    after: [dependencies]
     plugin: dump
     source: ./other-files/
