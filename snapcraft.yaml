@@ -1,0 +1,60 @@
+name: egl-kyu
+base: core26
+#adopt-info: egl-kyu
+version: testing
+platforms:
+  amd64:
+    build-on: [amd64]
+    build-for: [amd64]
+summary: Epic Games Launcher
+description: |
+  An unofficial Snap package for the Epic Games Launcher.
+grade: stable
+confinement: strict
+license: Proprietary
+
+apps:
+  egl-kyu:
+    command-chain: [override-xdg-paths]
+    command: usr/bin/EpicGamesLauncher
+    desktop: usr/share/applications/epic-games-launcher.desktop
+    environment:
+      HOME: $SNAP_USER_COMMON
+      PROTON_USE_WOW64: "1"
+    extensions: [gnome]
+    plugs:
+      - unity7
+      - audio-playback
+      - network
+      - network-bind
+      - network-status
+      - screen-inhibit-control
+      - home
+      - removable-media
+      - mount-observe
+      - joystick
+      - bluez
+      - udisks2
+      - system-observe
+      - hardware-observe
+      - upower-observe
+
+plugs:
+  shared-memory:
+    private: true
+
+parts:
+  egl-kyu:
+    plugin: dump
+    source: https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncher-x86_64.deb
+    override-build: |
+      craftctl default
+      sed -i 's|Name=Epic Games Launcher|Name=Epic Games Launcher [Kyu]]|' $CRAFT_PART_INSTALL/usr/share/applications/epic-games-launcher.desktop
+      sed -i 's|Icon=EpicGamesLauncher|Icon=${SNAP}/usr/share/icons/hicolor/256x256@2/apps/EpicGamesLauncher.png|' $CRAFT_PART_INSTALL/usr/share/applications/epic-games-launcher.desktop
+    prime:
+      - usr
+
+  other-files:
+    after: [egl-kyu]
+    plugin: dump
+    source: ./other-files/
