@@ -14,7 +14,7 @@ license: Proprietary
 
 apps:
   egl-kyu:
-    command-chain: [override-xdg-paths]
+    command-chain: [force-snap-common-folder]
     command: usr/bin/EpicGamesLauncher
     desktop: usr/share/applications/epic-games-launcher.desktop
     environment:
