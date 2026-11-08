@@ -19,6 +19,7 @@ apps:
     desktop: usr/share/applications/epic-games-launcher.desktop
     environment:
       HOME: $SNAP_USER_COMMON
+      EGL_DISABLE_SELF_UPDATE: 1
       PROTON_USE_WOW64: "1"
     extensions: [gnome]
     plugs:
